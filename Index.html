@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Structure & Replication Quiz</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --bg: #f4f7f6;
+            --text: #333;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+
+        .user-info {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #eef2f3;
+            border-radius: 8px;
+        }
+
+        .user-info input {
+            padding: 8px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .question {
+            margin-bottom: 25px;
+            padding: 15px;
+            border-left: 5px solid var(--secondary);
+            background: #fafafa;
+        }
+
+        .question p {
+            font-weight: bold;
+            margin-top: 0;
+        }
+
+        .options label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .options label:hover {
+            background: #edf2f7;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.2rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>DNA Structure & Replication Quiz</h1>
+    
+    <form id="quizForm" action="https://formspree.io/f/xgorlkjl" method="POST">
+        
+        <div class="user-info">
+            <label for="name">Student Full Name:</label>
+            <input type="text" name="Student Name" id="studentName" required>
+        </div>
+
+        <div id="questionsContainer"></div>
+
+        <input type="hidden" name="Final Score" id="hiddenScore">
+        <input type="hidden" name="Total Questions" value="20">
+        <input type="hidden" name="Timestamp" id="timestamp">
+
+        <button type="button" onclick="calculateAndSubmit()">Submit Quiz Results</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "Which of the following components make up the 'rungs' of the DNA ladder?", a: "B", options: ["Deoxyribose sugar and phosphate", "Nitrogenous bases joined by hydrogen bonds", "Histone proteins", "Nucleosomes"] },
+        { q: "According to base pairing rules, Adenine always pairs with:", a: "C", options: ["Guanine", "Cytosine", "Thymine", "Uracil"] },
+        { q: "How many hydrogen bonds are formed between Cytosine and Guanine?", a: "C", options: ["1", "2", "3", "4"] },
+        { q: "The DNA backbone is composed of:", a: "B", options: ["Nitrogenous bases", "Sugars and phosphate groups", "Purines and pyrimidines", "Amino acids"] },
+        { q: "Which of the following are classified as purines?", a: "B", options: ["Cytosine and Thymine", "Adenine and Guanine", "Adenine and Thymine", "Guanine and Cytosine"] },
+        { q: "A section of the DNA code that carries information for a polypeptide is called a:", a: "C", options: ["Nucleotide", "Nucleosome", "Gene", "Primer"] },
+        { q: "The DNA orientation where strands run in opposite directions is called:", a: "B", options: ["Parallel", "Antiparallel", "Semi-conservative", "Discontinuous"] },
+        { q: "What is the approximate diameter of the DNA double helix?", a: "A", options: ["2 nm", "10 nm", "30 nm", "300 nm"] },
+        { q: "DNA is wound around proteins called ________ to form a nucleosome.", a: "C", options: ["Helicases", "Topoisomerases", "Histones", "Polymerases"] },
+        { q: "A nucleosome is often described as 'beads on a string'. What is the fiber diameter?", a: "B", options: ["2 nm", "10 nm", "100 nm", "1400 nm"] },
+        { q: "Which histone protein helps pull nucleosomes together into a condensed fiber?", a: "D", options: ["H2A", "H2B", "H3", "H1"] },
+        { q: "DNA replication is 'semi-conservative' because:", a: "B", options: ["Original is kept intact", "New molecule contains one parental and one new strand", "Only certain genes are copied", "The code is altered"] },
+        { q: "Which enzyme untwists and separates parental DNA strands?", a: "C", options: ["Primase", "DNA Ligase", "Helicase", "Topoisomerase"] },
+        { q: "What is the role of Topoisomerase?", a: "B", options: ["Synthesizes RNA primer", "Relieves strain by breaking/rejoining strands", "Adds new nucleotides", "Joins Okazaki fragments"] },
+        { q: "Why is Primase necessary?", a: "C", options: ["Connects backbones", "Proofreads DNA", "Polymerases cannot initiate synthesis without a primer", "Keeps strands from re-pairing"] },
+        { q: "Which enzyme adds nucleotides to a preexisting chain?", a: "A", options: ["DNA Polymerase", "Helicase", "DNA Ligase", "Primase"] },
+        { q: "DNA Ligase is primarily responsible for:", a: "B", options: ["Unzipping DNA", "Joining sugar-phosphate backbones of fragments", "Matching A with T", "Relieving strain"] },
+        { q: "The Y-shaped region where strands are unwound is the:", a: "B", options: ["Replication bubble", "Replication fork", "Origin", "Centromere"] },
+        { q: "Which proteins prevent strands from re-pairing during replication?", a: "B", options: ["Histones", "Single-strand binding proteins", "DNA Polymerases", "Nucleosomes"] },
+        { q: "When does DNA replication occur?", a: "C", options: ["During mitosis", "After division", "Before division", "Only during UV damage"] }
+    ];
+
+    const container = document.getElementById('questionsContainer');
+
+    // Render Questions
+    quizData.forEach((data, index) => {
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question';
+        qDiv.innerHTML = `
+            <p>${index + 1}. ${data.q}</p>
+            <div class="options">
+                ${data.options.map((opt, i) => {
+                    const letter = String.fromCharCode(65 + i);
+                    return `
+                        <label>
+                            <input type="radio" name="q${index}" value="${letter}" required>
+                            ${letter}) ${opt}
+                        </label>
+                    `;
+                }).join('')}
+            </div>
+        `;
+        container.appendChild(qDiv);
+    });
+
+    function calculateAndSubmit() {
+        const form = document.getElementById('quizForm');
+        const nameInput = document.getElementById('studentName');
+        
+        if (!nameInput.value) {
+            alert("Please enter your name.");
+            return;
+        }
+
+        let score = 0;
+        quizData.forEach((data, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            if (selected && selected.value === data.a) {
+                score++;
+            }
+        });
+
+        // Set hidden fields for Formspree
+        document.getElementById('hiddenScore').value = `${score} / ${quizData.length} (${(score/quizData.length)*100}%)`;
+        document.getElementById('timestamp').value = new Date().toLocaleString();
+
+        const resultDisplay = document.getElementById('result');
+        resultDisplay.style.display = "block";
+        resultDisplay.innerHTML = `Calculating and sending results... Score: ${score}/20`;
+
+        // Submit to Formspree
+        form.submit();
+    }
+</script>
+
+</body>
+</html>
